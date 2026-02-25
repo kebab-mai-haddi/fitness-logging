@@ -14,18 +14,9 @@
     <h1>Fitness Dashboard</h1>
     <div class="header-actions">
       <button class="btn" id="btn-refresh">Refresh Data</button>
-      <a class="btn btn-primary" id="log-workout-link" href="#" target="_blank" style="display:none;">+ Log Workout</a>
+      <a class="btn btn-primary" id="log-workout-link" href="#" target="_blank">+ Log Workout</a>
     </div>
   </header>
-
-  <!-- Setup prompt (shown when no sheet ID is configured) -->
-  <div id="setup" class="setup-prompt" style="display:none;">
-    <h2>Welcome to Fitness Dashboard</h2>
-    <p>Enter your Google Sheet ID to get started. You can find this in the URL of your published sheet.</p>
-    <input type="text" id="sheet-id-input" placeholder="Google Sheet ID (e.g. 1BxiMVs0XRA...)">
-    <input type="text" id="form-url-input" placeholder="Google Form URL (optional)">
-    <button class="btn btn-primary" id="btn-save-setup" style="width:100%;justify-content:center;">Connect Sheet</button>
-  </div>
 
   <!-- Loading state -->
   <div id="loading" class="loading" style="display:none;">

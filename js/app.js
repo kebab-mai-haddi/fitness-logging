@@ -1,10 +1,10 @@
 // app.js — Init, tabs, filters, stats, config
 
 const App = (() => {
-  // ===== CONFIG — Set these values =====
+  // ===== CONFIG — Set these two values and you're done =====
   const CONFIG = {
-    sheetId: '', // Paste your Google Sheet ID here
-    formUrl: '', // Paste your Google Form URL here
+    sheetId: '',  // Paste your Google Sheet ID here
+    formUrl: '',  // Paste your Google Form URL here
   };
 
   let allData = [];
@@ -12,17 +12,15 @@ const App = (() => {
 
   // ===== Init =====
   async function init() {
-    // Check localStorage for saved config
-    const savedSheetId = localStorage.getItem('fitness_sheet_id');
-    const savedFormUrl = localStorage.getItem('fitness_form_url');
-    if (savedSheetId) CONFIG.sheetId = savedSheetId;
-    if (savedFormUrl) CONFIG.formUrl = savedFormUrl;
-
-    // Update form link
-    updateFormLink();
+    const formLink = document.getElementById('log-workout-link');
+    if (CONFIG.formUrl) {
+      formLink.href = CONFIG.formUrl;
+    } else {
+      formLink.style.display = 'none';
+    }
 
     if (!CONFIG.sheetId) {
-      showSetup();
+      showError('No Sheet ID configured. Set CONFIG.sheetId in js/app.js');
       return;
     }
 
@@ -41,61 +39,24 @@ const App = (() => {
     }
   }
 
-  // ===== Setup prompt =====
-  function showSetup() {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'none';
-    document.getElementById('error').style.display = 'none';
-    document.getElementById('setup').style.display = 'block';
-  }
-
   function showLoading() {
-    document.getElementById('setup').style.display = 'none';
     document.getElementById('dashboard').style.display = 'none';
     document.getElementById('error').style.display = 'none';
     document.getElementById('loading').style.display = 'flex';
   }
 
   function showDashboard() {
-    document.getElementById('setup').style.display = 'none';
     document.getElementById('loading').style.display = 'none';
     document.getElementById('error').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
   }
 
   function showError(msg) {
-    document.getElementById('setup').style.display = 'none';
     document.getElementById('loading').style.display = 'none';
     document.getElementById('dashboard').style.display = 'none';
     const errorEl = document.getElementById('error');
     errorEl.style.display = 'block';
     errorEl.querySelector('.error-detail').textContent = msg;
-  }
-
-  function saveSetup() {
-    const sheetInput = document.getElementById('sheet-id-input');
-    const formInput = document.getElementById('form-url-input');
-    const id = sheetInput.value.trim();
-    const url = formInput.value.trim();
-
-    if (!id) {
-      sheetInput.focus();
-      return;
-    }
-
-    CONFIG.sheetId = id;
-    CONFIG.formUrl = url;
-    localStorage.setItem('fitness_sheet_id', id);
-    if (url) localStorage.setItem('fitness_form_url', url);
-    init();
-  }
-
-  function updateFormLink() {
-    const link = document.getElementById('log-workout-link');
-    if (link && CONFIG.formUrl) {
-      link.href = CONFIG.formUrl;
-      link.style.display = 'inline-flex';
-    }
   }
 
   // ===== Filters =====
@@ -111,7 +72,6 @@ const App = (() => {
     exSelect.innerHTML = '<option value="">All Exercises</option>' +
       exercises.map(e => `<option value="${e}">${e}</option>`).join('');
 
-    // Also populate progress tab exercise selector
     const progressSelect = document.getElementById('progress-exercise');
     if (progressSelect) {
       const liftExercises = exercises.filter(e =>
@@ -144,11 +104,9 @@ const App = (() => {
   function renderStats() {
     const data = filteredData;
 
-    // Total workouts (unique dates)
     const uniqueDates = new Set(data.map(r => r.dateKey));
     document.getElementById('stat-total').textContent = uniqueDates.size;
 
-    // This week
     const today = new Date();
     const monday = new Date(today);
     const day = monday.getDay();
@@ -157,22 +115,17 @@ const App = (() => {
     const thisWeek = new Set(data.filter(r => r.dateKey >= mondayKey).map(r => r.dateKey));
     document.getElementById('stat-week').textContent = thisWeek.size;
 
-    // Total volume
     const totalVol = data.reduce((sum, r) => sum + r.volume, 0);
     document.getElementById('stat-volume').textContent = formatNumber(totalVol);
 
-    // Streak (consecutive days with workouts, counting backward from today)
-    const streak = computeStreak(data);
-    document.getElementById('stat-streak').textContent = streak;
+    document.getElementById('stat-streak').textContent = computeStreak(data);
   }
 
   function computeStreak(data) {
     const datesSet = new Set(data.map(r => r.dateKey));
     let streak = 0;
     const d = new Date();
-    // Check if today has a workout; if not, start from yesterday
-    const todayKey = d.toISOString().split('T')[0];
-    if (!datesSet.has(todayKey)) {
+    if (!datesSet.has(d.toISOString().split('T')[0])) {
       d.setDate(d.getDate() - 1);
     }
     for (let i = 0; i < 365; i++) {
@@ -251,7 +204,7 @@ const App = (() => {
     if (!tbody) return;
 
     const sorted = [...data].sort((a, b) => b.dateObj - a.dateObj);
-    const rows = sorted.slice(0, 200); // Limit to 200 rows
+    const rows = sorted.slice(0, 200);
 
     tbody.innerHTML = rows.map(r => {
       const tagClass = getTagClass(r.workoutDay);
@@ -307,8 +260,6 @@ const App = (() => {
     initTabs();
 
     document.getElementById('btn-refresh').addEventListener('click', refresh);
-    document.getElementById('btn-save-setup').addEventListener('click', saveSetup);
-
     document.getElementById('filter-workout-day').addEventListener('change', applyFilters);
     document.getElementById('filter-exercise').addEventListener('change', applyFilters);
     document.getElementById('filter-date-from').addEventListener('change', applyFilters);
@@ -319,15 +270,10 @@ const App = (() => {
       progressSelect.addEventListener('change', () => renderProgressTab(filteredData));
     }
 
-    // Allow Enter key in setup
-    document.getElementById('sheet-id-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter') saveSetup();
-    });
-
     init();
   }
 
   document.addEventListener('DOMContentLoaded', boot);
 
-  return { refresh, saveSetup };
+  return { refresh };
 })();

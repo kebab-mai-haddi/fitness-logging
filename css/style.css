@@ -339,42 +339,6 @@ body {
   font-size: 0.9rem;
 }
 
-/* Setup prompt */
-.setup-prompt {
-  max-width: 600px;
-  margin: 60px auto;
-  padding: 32px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  text-align: center;
-}
-
-.setup-prompt h2 {
-  margin-bottom: 12px;
-}
-
-.setup-prompt p {
-  color: var(--text-secondary);
-  margin-bottom: 20px;
-}
-
-.setup-prompt input[type="text"] {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  font-size: 0.95rem;
-  margin-bottom: 12px;
-}
-
-.setup-prompt input[type="text"]:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-
 /* Responsive */
 @media (max-width: 1024px) {
   .chart-grid {
