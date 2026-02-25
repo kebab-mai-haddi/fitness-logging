@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fitness Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <h1>Fitness Dashboard</h1>
+    <div class="header-actions">
+      <button class="btn" id="btn-refresh">Refresh Data</button>
+      <a class="btn btn-primary" id="log-workout-link" href="#" target="_blank" style="display:none;">+ Log Workout</a>
+    </div>
+  </header>
+
+  <!-- Setup prompt (shown when no sheet ID is configured) -->
+  <div id="setup" class="setup-prompt" style="display:none;">
+    <h2>Welcome to Fitness Dashboard</h2>
+    <p>Enter your Google Sheet ID to get started. You can find this in the URL of your published sheet.</p>
+    <input type="text" id="sheet-id-input" placeholder="Google Sheet ID (e.g. 1BxiMVs0XRA...)">
+    <input type="text" id="form-url-input" placeholder="Google Form URL (optional)">
+    <button class="btn btn-primary" id="btn-save-setup" style="width:100%;justify-content:center;">Connect Sheet</button>
+  </div>
+
+  <!-- Loading state -->
+  <div id="loading" class="loading" style="display:none;">
+    <div class="spinner"></div>
+    <span>Loading workout data...</span>
+  </div>
+
+  <!-- Error state -->
+  <div id="error" class="error-message" style="display:none;">
+    <h2>Failed to load data</h2>
+    <p class="error-detail"></p>
+    <p>Check that your sheet is published and the ID is correct.</p>
+    <button class="btn" onclick="location.reload()" style="margin-top:16px;">Retry</button>
+  </div>
+
+  <!-- Dashboard (hidden until data loads) -->
+  <div id="dashboard" style="display:none;">
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="filter-group">
+        <label>From</label>
+        <input type="date" id="filter-date-from">
+      </div>
+      <div class="filter-group">
+        <label>To</label>
+        <input type="date" id="filter-date-to">
+      </div>
+      <div class="filter-group">
+        <label>Day</label>
+        <select id="filter-workout-day"><option value="">All Days</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Exercise</label>
+        <select id="filter-exercise"><option value="">All Exercises</option></select>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-label">Total Workouts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-week">0</div>
+        <div class="stat-label">This Week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-volume">0</div>
+        <div class="stat-label">Total Volume</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-streak">0</div>
+        <div class="stat-label">Day Streak</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="overview">Overview</button>
+      <button class="tab-btn" data-tab="progress">Progress</button>
+      <button class="tab-btn" data-tab="frequency">Frequency</button>
+      <button class="tab-btn" data-tab="volume">Volume</button>
+      <button class="tab-btn" data-tab="runs">Runs</button>
+      <button class="tab-btn" data-tab="history">History</button>
+    </nav>
+
+    <!-- Tab panels -->
+    <div class="tab-panels">
+
+      <!-- Overview -->
+      <div class="tab-panel active" id="panel-overview">
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h3>Exercise Distribution</h3>
+            <canvas id="chart-distribution"></canvas>
+          </div>
+          <div class="chart-card">
+            <h3>Weekly Workout Trends</h3>
+            <canvas id="chart-weekly"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="tab-panel" id="panel-progress">
+        <div class="chart-grid single">
+          <div class="chart-card wide">
+            <h3>Progress Over Time</h3>
+            <div class="exercise-selector">
+              <select id="progress-exercise"></select>
+            </div>
+            <canvas id="chart-progress"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frequency -->
+      <div class="tab-panel" id="panel-frequency">
+        <div class="chart-grid single">
+          <div class="chart-card wide">
+            <h3>Workout Frequency</h3>
+            <div class="heatmap-container" id="heatmap-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Volume -->
+      <div class="tab-panel" id="panel-volume">
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h3>Volume by Exercise</h3>
+            <canvas id="chart-volume-exercise"></canvas>
+          </div>
+          <div class="chart-card">
+            <h3>Monthly Volume Trend</h3>
+            <canvas id="chart-monthly-volume"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Runs -->
+      <div class="tab-panel" id="panel-runs">
+        <div class="chart-grid single">
+          <div class="chart-card wide">
+            <h3>Running Progress</h3>
+            <canvas id="chart-runs"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="tab-panel" id="panel-history">
+        <div class="history-table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Exercise</th>
+                <th>Detail</th>
+                <th>Volume</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="history-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
