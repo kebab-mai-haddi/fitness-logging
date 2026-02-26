@@ -10,11 +10,11 @@ const FitnessData = (() => {
   ];
 
   function getGvizUrl(sheetId) {
-    return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+    return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=Data`;
   }
 
   function getCsvUrl(sheetId) {
-    return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+    return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=Data`;
   }
 
   function parseGvizResponse(text) {

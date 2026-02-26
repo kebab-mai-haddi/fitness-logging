@@ -1,10 +1,9 @@
 // app.js — Init, tabs, filters, stats, config
 
 const App = (() => {
-  // ===== CONFIG — Set these values =====
+  // ===== CONFIG — Set your Sheet ID here =====
   const CONFIG = {
     sheetId: '', // Paste your Google Sheet ID here
-    formUrl: '', // Paste your Google Form URL here
   };
 
   let allData = [];
@@ -12,17 +11,8 @@ const App = (() => {
 
   // ===== Init =====
   async function init() {
-    // Check localStorage for saved config
-    const savedSheetId = localStorage.getItem('fitness_sheet_id');
-    const savedFormUrl = localStorage.getItem('fitness_form_url');
-    if (savedSheetId) CONFIG.sheetId = savedSheetId;
-    if (savedFormUrl) CONFIG.formUrl = savedFormUrl;
-
-    // Update form link
-    updateFormLink();
-
     if (!CONFIG.sheetId) {
-      showSetup();
+      showError('Set CONFIG.sheetId in js/app.js');
       return;
     }
 
@@ -41,61 +31,25 @@ const App = (() => {
     }
   }
 
-  // ===== Setup prompt =====
-  function showSetup() {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'none';
-    document.getElementById('error').style.display = 'none';
-    document.getElementById('setup').style.display = 'block';
-  }
-
+  // ===== UI States =====
   function showLoading() {
-    document.getElementById('setup').style.display = 'none';
     document.getElementById('dashboard').style.display = 'none';
     document.getElementById('error').style.display = 'none';
     document.getElementById('loading').style.display = 'flex';
   }
 
   function showDashboard() {
-    document.getElementById('setup').style.display = 'none';
     document.getElementById('loading').style.display = 'none';
     document.getElementById('error').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
   }
 
   function showError(msg) {
-    document.getElementById('setup').style.display = 'none';
     document.getElementById('loading').style.display = 'none';
     document.getElementById('dashboard').style.display = 'none';
     const errorEl = document.getElementById('error');
     errorEl.style.display = 'block';
     errorEl.querySelector('.error-detail').textContent = msg;
-  }
-
-  function saveSetup() {
-    const sheetInput = document.getElementById('sheet-id-input');
-    const formInput = document.getElementById('form-url-input');
-    const id = sheetInput.value.trim();
-    const url = formInput.value.trim();
-
-    if (!id) {
-      sheetInput.focus();
-      return;
-    }
-
-    CONFIG.sheetId = id;
-    CONFIG.formUrl = url;
-    localStorage.setItem('fitness_sheet_id', id);
-    if (url) localStorage.setItem('fitness_form_url', url);
-    init();
-  }
-
-  function updateFormLink() {
-    const link = document.getElementById('log-workout-link');
-    if (link && CONFIG.formUrl) {
-      link.href = CONFIG.formUrl;
-      link.style.display = 'inline-flex';
-    }
   }
 
   // ===== Filters =====
@@ -307,7 +261,6 @@ const App = (() => {
     initTabs();
 
     document.getElementById('btn-refresh').addEventListener('click', refresh);
-    document.getElementById('btn-save-setup').addEventListener('click', saveSetup);
 
     document.getElementById('filter-workout-day').addEventListener('change', applyFilters);
     document.getElementById('filter-exercise').addEventListener('change', applyFilters);
@@ -319,15 +272,10 @@ const App = (() => {
       progressSelect.addEventListener('change', () => renderProgressTab(filteredData));
     }
 
-    // Allow Enter key in setup
-    document.getElementById('sheet-id-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter') saveSetup();
-    });
-
     init();
   }
 
   document.addEventListener('DOMContentLoaded', boot);
 
-  return { refresh, saveSetup };
+  return { refresh };
 })();
