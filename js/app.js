@@ -3,7 +3,7 @@
 const App = (() => {
   // ===== CONFIG — Set your Sheet ID here =====
   const CONFIG = {
-    sheetId: '', // Paste your Google Sheet ID here
+    sheetId: '1xHbsHgeROq1tWq6fcAkUWtO6qJruClQEukXcC1Knn0g',
   };
 
   let allData = [];
